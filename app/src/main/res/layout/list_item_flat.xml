@@ -1,0 +1,54 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <!-- Column 1: Flat Number (Centered) -->
+    <TextView
+        android:id="@+id/flatNumber"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Flat No"
+        android:textSize="18sp"
+        android:gravity="center"/>
+
+    <!-- Column 2: Current Reading (EditText) and Previous Reading -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/currentReading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:hint="Enter Current Reading"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/previousReading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Previous Reading"
+            android:textSize="16sp"
+            android:layout_marginTop="4dp"
+            android:textColor="@android:color/holo_blue_dark"
+            android:clickable="true"
+            android:focusable="true"/>
+    </LinearLayout>
+
+    <!-- Column 3: Total Maintenance (Centered) -->
+    <TextView
+        android:id="@+id/totalMaintenance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Total Maintenance"
+        android:textSize="18sp"
+        android:gravity="center"/>
+</LinearLayout>
