@@ -1,9 +1,8 @@
 package com.example.myapplication;
 
+import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.pdf.PdfDocument;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
@@ -12,9 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.content.ContentValues;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -24,12 +21,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Table;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -103,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
         // Load the default list (e.g., list 1)
         updateListView(1, button1);
 
+        dbHelper.logFlatsTableData();
+
     }
 
     @Override
@@ -116,36 +122,82 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            showSetMultiplierDialog();
+            showSetValuesDialog();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void showSetMultiplierDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Water rate: rs/KL");
 
-        // Set up the input
+//    int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
+
+    private void showSetValuesDialog() {
+        // Get current values from SharedPreferences
         int multiplier = PreferenceUtils.getMultiplier(this);
-        final EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setText(String.valueOf(multiplier));
-        builder.setView(input);
+        int fixedMaintenance = PreferenceUtils.getFixedMaintenance(this);
 
+        // Create the AlertDialog builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Values");
+
+        // Create a LinearLayout to hold the labels and EditTexts
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10); // Optional: Set padding for better layout
+
+        // Create TextView for multiplier label
+        TextView multiplierLabel = new TextView(this);
+        multiplierLabel.setText("Water rate (Rs/KL):");
+        multiplierLabel.setTextSize(16);
+        multiplierLabel.setPadding(0, 10, 0, 5);
+        layout.addView(multiplierLabel);
+
+        // Create EditText for multiplier
+        final EditText multiplierInput = new EditText(this);
+        multiplierInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        multiplierInput.setText(String.valueOf(multiplier));
+        multiplierInput.setHint("Enter water rate");
+        layout.addView(multiplierInput);
+
+        // Create TextView for fixed maintenance label
+        TextView fixedMaintenanceLabel = new TextView(this);
+        fixedMaintenanceLabel.setText("Fixed Maintenance:");
+        fixedMaintenanceLabel.setTextSize(16);
+        fixedMaintenanceLabel.setPadding(0, 20, 0, 5);
+        layout.addView(fixedMaintenanceLabel);
+
+        // Create EditText for fixed maintenance
+        final EditText fixedMaintenanceInput = new EditText(this);
+        fixedMaintenanceInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        fixedMaintenanceInput.setText(String.valueOf(fixedMaintenance));
+        fixedMaintenanceInput.setHint("Enter fixed maintenance");
+        layout.addView(fixedMaintenanceInput);
+
+        // Set the layout in the dialog
+        builder.setView(layout);
+
+        // Set the positive button to save values
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String value = input.getText().toString();
                 try {
-                    int multiplier = Integer.parseInt(value);
-                    PreferenceUtils.updateMultiplier(MainActivity.this, multiplier);
+                    // Get and save the multiplier
+                    int newMultiplier = Integer.parseInt(multiplierInput.getText().toString());
+                    PreferenceUtils.updateMultiplier(MainActivity.this, newMultiplier);
+
+                    // Get and save the fixed maintenance
+                    int newFixedMaintenance = Integer.parseInt(fixedMaintenanceInput.getText().toString());
+                    PreferenceUtils.updateFixedMaintenance(MainActivity.this, newFixedMaintenance);
+
+                    Toast.makeText(MainActivity.this, "Values updated successfully", Toast.LENGTH_SHORT).show();
                 } catch (NumberFormatException e) {
                     Toast.makeText(MainActivity.this, "Invalid number", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        // Set the negative button to cancel
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -153,8 +205,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Show the dialog
         builder.show();
     }
+
 
     private void updateListView(int listType, Button selectedButton) {
         List<Flat> flats = dbHelper.getFlatsByListType(listType);
@@ -250,132 +304,93 @@ public class MainActivity extends AppCompatActivity {
                 return "unknown";
         }
     }
-
-    private void exportFlatsToPdf() {
-        List<Flat> flats = flatAdapter.getFlats(); // Get the current flats from the adapter
-
-        // Create a new PdfDocument
-        PdfDocument pdfDocument = new PdfDocument();
-
-        // Paint object to customize text appearance and lines
-        Paint paint = new Paint();
-        paint.setTextSize(12);
-        paint.setStyle(Paint.Style.STROKE); // Set style to STROKE for lines
-
-        Paint textPaint = new Paint();
-        textPaint.setTextSize(12);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-
-        // Create a page description
-        PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(400, 600, 1).create();
-        PdfDocument.Page page = pdfDocument.startPage(pageInfo);
-
-        Canvas canvas = page.getCanvas();
-
-        int pageWidth = pageInfo.getPageWidth();
-        int x = 30; // Starting x coordinate for the table
-        int y = 25;
-        int rowHeight = 25; // Height of each row
-        int lineSpacing = 5; // Adjusted spacing for text inside the cells
-
-        // Define column widths
-        int flatNumberColWidth = 60;
-        int previousReadingColWidth = 80;
-        int currentReadingColWidth = 80;
-        int totalMaintenanceColWidth = 80;
-
-        // Total width of the table
-        int tableWidth = flatNumberColWidth + previousReadingColWidth + currentReadingColWidth + totalMaintenanceColWidth;
-
-        // Center the table on the page
-        x = (pageWidth - tableWidth - 20) / 2; // 20 for padding
-
-        String listName = getListName();
-        textPaint.setTextSize(16); // Larger font size for the list name
-        canvas.drawText(listName, (pageWidth - textPaint.measureText(listName)) / 2, y + 20, textPaint);
-
-        // Draw the header row
-        int headerY = y + rowHeight / 2 + 4; // Adjust vertical alignment
-
-        canvas.drawRect(x, y, x + tableWidth, y + rowHeight, paint); // Draw a rectangle for the header row
-        canvas.drawText("Flat No.", x + lineSpacing, headerY, textPaint);
-        canvas.drawText("Prev. Reading", x + flatNumberColWidth + lineSpacing, headerY, textPaint);
-        canvas.drawText("Curr. Reading", x + flatNumberColWidth + previousReadingColWidth + lineSpacing, headerY, textPaint);
-        canvas.drawText("Total Maint.", x + flatNumberColWidth + previousReadingColWidth + currentReadingColWidth + lineSpacing, headerY, textPaint);
-
-        // Draw vertical lines for columns
-        int currentX = x;
-        canvas.drawLine(currentX, y, currentX, y + rowHeight * (flats.size() + 2), paint); // Left border
-        currentX += flatNumberColWidth;
-        canvas.drawLine(currentX, y, currentX, y + rowHeight * (flats.size() + 2), paint);
-        currentX += previousReadingColWidth;
-        canvas.drawLine(currentX, y, currentX, y + rowHeight * (flats.size() + 2), paint);
-        currentX += currentReadingColWidth;
-        canvas.drawLine(currentX, y, currentX, y + rowHeight * (flats.size() + 2), paint);
-        currentX += totalMaintenanceColWidth;
-        canvas.drawLine(currentX, y, currentX, y + rowHeight * (flats.size() + 2), paint); // Right border
-
-        y += rowHeight; // Move to the next row
-
-        // Draw each data row
-        for (Flat flat : flats) {
-            canvas.drawRect(x, y, x + tableWidth, y + rowHeight, paint); // Draw a rectangle for each data row
-
-            // Draw text inside the cells
-            canvas.drawText(flat.getFlatNumber(), x + lineSpacing, y + rowHeight / 2 + 4, textPaint);
-            canvas.drawText(flat.getPreviousReading(), x + flatNumberColWidth + lineSpacing, y + rowHeight / 2 + 4, textPaint);
-            canvas.drawText(flat.getCurrentReading(), x + flatNumberColWidth + previousReadingColWidth + lineSpacing, y + rowHeight / 2 + 4, textPaint);
-            canvas.drawText(flat.getTotalMaintenance(), x + flatNumberColWidth + previousReadingColWidth + currentReadingColWidth + lineSpacing, y + rowHeight / 2 + 4, textPaint);
-
-            y += rowHeight; // Move to the next row
-        }
-
-        // Finish the page
-        pdfDocument.finishPage(page);
-
+    public void exportFlatsToPdf() {
         // Get current date in MonthName_Date format
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM_dd", Locale.getDefault());
         String currentDate = dateFormat.format(new Date());
         String fileName = getListName() + "_" + currentDate + "_records.pdf";
 
-        FileOutputStream outStream = null;
+        try {
+            PdfWriter writer;
+            PdfDocument pdfDocument;
+            Document document;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // On Android 10 and above, use MediaStore to save the PDF
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
-            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+                values.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
-            Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
-            if (uri != null) {
-                try {
-                    outStream = (FileOutputStream) getContentResolver().openOutputStream(uri);
-                    pdfDocument.writeTo(outStream);
+                if (uri != null) {
+                    writer = new PdfWriter(getContentResolver().openOutputStream(uri));
+                    pdfDocument = new PdfDocument(writer);
+                    document = new Document(pdfDocument);
+
+                    // Add table to document
+                    document.add(createTable());
+
+                    document.close();
                     Toast.makeText(this, "PDF saved successfully", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Error saving PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                } finally {
-                    pdfDocument.close();
                 }
-            }
-        } else {
-            // For older versions, save the PDF using traditional file handling
-            File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            File filePath = new File(downloadsDir, fileName);
-            try {
-                outStream = new FileOutputStream(filePath);
-                pdfDocument.writeTo(outStream);
+            } else {
+                File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File filePath = new File(downloadsDir, fileName);
+
+                writer = new PdfWriter(new FileOutputStream(filePath));
+                pdfDocument = new PdfDocument(writer);
+                document = new Document(pdfDocument);
+
+                // Add table to document
+                document.add(createTable());
+
+                document.close();
                 Toast.makeText(this, "PDF saved at " + filePath.getAbsolutePath(), Toast.LENGTH_LONG).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Toast.makeText(this, "Error saving PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            } finally {
-                pdfDocument.close();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error saving PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "An unexpected error occurred: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private Table createTable() {
+        List<Flat> flats = flatAdapter.getFlats();
+        int multiplier = PreferenceUtils.getMultiplier(this);
+        int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
+
+        Table table = new Table(8);
+
+        table.addCell("Flat No.");
+        table.addCell("prev. Reading");
+        table.addCell("curr. Reading");
+        table.addCell("Total units");
+        table.addCell("Rate/KL");
+        table.addCell("Water Bill");
+        table.addCell("Fixed Maint.");
+        table.addCell("Total Maint.");
+
+        for (Flat flat : flats) {
+            int curr = Integer.parseInt(flat.getCurrentReading());
+            int prev = Integer.parseInt(flat.getPreviousReading());
+            int totalunit = curr - prev;
+            int waterBill = totalunit * multiplier;
+            int totalmaintainance = waterBill + fixmaintainance;
+
+            table.addCell(flat.getFlatNumber());
+            table.addCell(String.valueOf(prev));
+            table.addCell(String.valueOf(curr));
+            table.addCell(String.valueOf(totalunit));
+            table.addCell(String.valueOf(multiplier));
+            table.addCell(String.valueOf(waterBill));
+            table.addCell(String.valueOf(fixmaintainance));
+            table.addCell(String.valueOf(totalmaintainance));
+        }
+
+        return table;
     }
 
     private boolean checkPermission() {
@@ -409,4 +424,5 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
 }

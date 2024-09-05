@@ -33,8 +33,7 @@ android {
 
 dependencies {
 
-    implementation("com.itextpdf:itext7-core:7.2.0")
-    implementation("com.itextpdf:itext7-core:7.2.8")
+    implementation(libs.itext7.core)
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)

@@ -64,10 +64,11 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                         int currentReadingInt = Integer.parseInt(currentReadingValue);
                         int previousReadingInt = Integer.parseInt(flat.getPreviousReading());
                         int multiplier = PreferenceUtils.getMultiplier(context);
+                        int fixmaintainance = PreferenceUtils.getFixedMaintenance(context);
                         if (currentReadingInt > previousReadingInt) {
-                            int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + 500;
+                            int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + fixmaintainance;
                             totalMaintenance.setText("₹ " + maintenance);
-                            flat.updateTotalMaintenance(currentReadingInt);
+                            flat.updateTotalMaintenance(currentReadingInt,context);
                         } else {
                             totalMaintenance.setText("Invalid input");
                         }

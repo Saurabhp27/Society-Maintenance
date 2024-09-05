@@ -1,5 +1,7 @@
 package com.example.myapplication;
 
+import android.content.Context;
+
 public class Flat {
     private int id; // Add this field
     private String flatNumber;
@@ -41,9 +43,11 @@ public class Flat {
         return totalMaintenance;
     }
 
-    public void updateTotalMaintenance(int currentReading) {
+    public void updateTotalMaintenance(int currentReading, Context context) {
+        int multiplier = PreferenceUtils.getMultiplier(context);
+        int fixedMaintenance = PreferenceUtils.getFixedMaintenance(context);
         int previousReadingInt = Integer.parseInt(previousReading);
-        int maintenance = ((currentReading - previousReadingInt) * 25) + 500;
+        int maintenance = ((currentReading - previousReadingInt) * multiplier ) + fixedMaintenance;
         this.totalMaintenance = String.valueOf(maintenance);
     }
 

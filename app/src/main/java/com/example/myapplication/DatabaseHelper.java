@@ -184,5 +184,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void logFlatsTableData() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_FLATS;
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                String flatNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FLAT_NUMBER));
+                String previousReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PREVIOUS_READING));
+                String totalMaintenance = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_MAINTENANCE));
+                String currentReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENT_READING));
+                int listType = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LIST_TYPE));
+
+                Log.d("FlatTableData", "ID: " + id +
+                        ", Flat Number: " + flatNumber +
+                        ", Previous Reading: " + previousReading +
+                        ", Total Maintenance: " + totalMaintenance +
+                        ", Current Reading: " + currentReading +
+                        ", List Type: " + listType);
+            } while (cursor.moveToNext());
+        } else {
+            Log.d("FlatTableData", "No data found in the flats table.");
+        }
+
+        cursor.close();
+    }
+
+
 }
 
