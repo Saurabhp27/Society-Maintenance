@@ -59,19 +59,27 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <!-- Save Button -->
-    <Button
-        android:id="@+id/saveButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save All Readings"/>
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/printButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Save and Print current wing Readings"/>
+        <!-- Save Button -->
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Save"/>
 
+        <!-- Print Button -->
+        <Button
+            android:id="@+id/printButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Save and Print"/>
 
+    </LinearLayout>
 
 </LinearLayout>

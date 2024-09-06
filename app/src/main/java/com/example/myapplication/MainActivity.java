@@ -17,8 +17,10 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -33,7 +35,11 @@ import androidx.core.content.ContextCompat;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -102,7 +108,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Set up save button click listener
-        currentSaveButton.setOnClickListener(view -> saveAllReadings());
+        currentSaveButton.setOnClickListener(view -> {
+            boolean isSaved = saveAllReadings();
+            if (isSaved) {
+                Toast.makeText(getApplicationContext(), "Readings saved", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Load the default list (e.g., list 1)
         updateListView(1, button1);
@@ -126,8 +137,57 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
 
+        if (id == R.id.action_update) {
+            updateprevreadingfunctonality();
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
+
+    private void updateprevreadingfunctonality() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_update, null);
+
+        // Create the outer dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        // Show the outer dialog
+        AlertDialog outerDialog = builder.create();
+        outerDialog.show();
+
+        // Find and set up the Update button
+        Button updateButton = dialogView.findViewById(R.id.dialog_update_button);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Show confirmation dialog
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Confirm Update")
+                        .setMessage("Are you sure you want to update?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Handle the update action
+                                if (saveAllReadingsForAllFlats()) {
+                                    dbHelper.performUpdate();
+                                    updateListView(currentListType, getSelectedButton());
+                                }
+                                // Close the outer dialog as well
+                                outerDialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // Close the outer dialog when "No" is clicked
+                                outerDialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        });
+    }
+
 
 
 //    int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
@@ -264,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
                 dbHelper.updateFlat(flat.getId(), currentReading, totalMaintenance); // Update database
             }
 
-            Toast.makeText(this, "All readings saved", Toast.LENGTH_SHORT).show();
             updateListView(currentListType, getSelectedButton()); // Refresh the ListView to reflect updated data
             return true;
         } else {
@@ -273,6 +332,44 @@ public class MainActivity extends AppCompatActivity {
             return false;
         }
     }
+
+    private boolean saveAllReadingsForAllFlats() {
+        List<Flat> flats = dbHelper.getAllFlats(); // Get all flats from the database
+        boolean allValid = true; // Flag to track if all readings are valid
+
+        // First, validate all readings
+        for (Flat flat : flats) {
+            try {
+                int previousReading = Integer.parseInt(flat.getPreviousReading());
+                int currentReading = Integer.parseInt(flat.getCurrentReading());
+
+                if (currentReading <= previousReading) {
+                    allValid = false; // Set flag to false if any reading is invalid
+                    break; // Exit loop early since validation failed
+                }
+            } catch (NumberFormatException e) {
+                allValid = false; // Set flag to false if any number format exception occurs
+                break; // Exit loop early
+            }
+        }
+
+        if (allValid) {
+            // If all readings are valid, update the database and show the success message
+            for (Flat flat : flats) {
+                String currentReading = flat.getCurrentReading();
+                String totalMaintenance = flat.getTotalMaintenance();
+                dbHelper.updateFlat(flat.getId(), currentReading, totalMaintenance); // Update database
+            }
+
+            Toast.makeText(this, "Readings Updated Successfully for all Flats", Toast.LENGTH_SHORT).show();
+            return true;
+        } else {
+            // If any reading was invalid, show the error message
+            Toast.makeText(this, "All Readings should be greater than previous reading", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
 
 
     private Button getSelectedButton() {
@@ -293,13 +390,13 @@ public class MainActivity extends AppCompatActivity {
     private String getListName() {
         switch (currentListType) {
             case 1:
-                return "siddhA";
+                return "Siddh-A";
             case 2:
-                return "siddhB";
+                return "Siddh-B";
             case 3:
-                return "sargamA";
+                return "Sargam-A";
             case 4:
-                return "sargamB";
+                return "Sargam-B";
             default:
                 return "unknown";
         }
@@ -360,38 +457,55 @@ public class MainActivity extends AppCompatActivity {
     private Table createTable() {
         List<Flat> flats = flatAdapter.getFlats();
         int multiplier = PreferenceUtils.getMultiplier(this);
-        int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
+        int fixMaintenance = PreferenceUtils.getFixedMaintenance(this);
 
+        // Create a table with a single cell for the heading
+        Table headingTable = new Table(1);
+        headingTable.addCell(new Cell().add(new Paragraph(getListName()).setFontSize(20).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+
+        // Add the date below the heading
+        String currentDate = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(new Date());
+        headingTable.addCell(new Cell().add(new Paragraph(currentDate).setFontSize(12)).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+
+        // Create the main table with 8 columns
         Table table = new Table(8);
 
-        table.addCell("Flat No.");
-        table.addCell("prev. Reading");
-        table.addCell("curr. Reading");
-        table.addCell("Total units");
-        table.addCell("Rate/KL");
-        table.addCell("Water Bill");
-        table.addCell("Fixed Maint.");
-        table.addCell("Total Maint.");
+        // Add headers to the table
+        table.addHeaderCell("Flat No.");
+        table.addHeaderCell("Prev. Reading");
+        table.addHeaderCell("Curr. Reading");
+        table.addHeaderCell("Total Units");
+        table.addHeaderCell("Rate/KL");
+        table.addHeaderCell("Water Bill");
+        table.addHeaderCell("Fixed Maint.");
+        table.addHeaderCell("Total Maint.");
 
+        // Add data rows to the table
         for (Flat flat : flats) {
             int curr = Integer.parseInt(flat.getCurrentReading());
             int prev = Integer.parseInt(flat.getPreviousReading());
-            int totalunit = curr - prev;
-            int waterBill = totalunit * multiplier;
-            int totalmaintainance = waterBill + fixmaintainance;
+            int totalUnit = curr - prev;
+            int waterBill = totalUnit * multiplier;
+            int totalMaintenance = waterBill + fixMaintenance;
 
             table.addCell(flat.getFlatNumber());
             table.addCell(String.valueOf(prev));
             table.addCell(String.valueOf(curr));
-            table.addCell(String.valueOf(totalunit));
+            table.addCell(String.valueOf(totalUnit));
             table.addCell(String.valueOf(multiplier));
             table.addCell(String.valueOf(waterBill));
-            table.addCell(String.valueOf(fixmaintainance));
-            table.addCell(String.valueOf(totalmaintainance));
+            table.addCell(String.valueOf(fixMaintenance));
+            table.addCell(String.valueOf(totalMaintenance));
         }
 
-        return table;
+        // Combine the heading table and main table
+        Table finalTable = new Table(1);
+        finalTable.addCell(new Cell().add(headingTable).setBorder(Border.NO_BORDER));
+        finalTable.addCell(new Cell().add(table).setBorder(Border.NO_BORDER));
+
+        return finalTable;
     }
+
 
     private boolean checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

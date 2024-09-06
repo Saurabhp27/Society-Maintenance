@@ -66,24 +66,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertInitialFlat(db, "102", "100", "0", "", 1);
         insertInitialFlat(db, "103", "100", "0", "", 1);
         insertInitialFlat(db, "104", "100", "0", "", 1);
-        insertInitialFlat(db, "105", "100", "0", "", 1);
-        insertInitialFlat(db, "106", "100", "0", "", 1);
-        insertInitialFlat(db, "201", "100", "0", "", 1);
-        insertInitialFlat(db, "202", "100", "0", "", 1);
-        insertInitialFlat(db, "203", "100", "0", "", 1);
-        insertInitialFlat(db, "204", "100", "0", "", 1);
-        insertInitialFlat(db, "205", "100", "0", "", 1);
-        insertInitialFlat(db, "206", "100", "0", "", 1);
-        insertInitialFlat(db, "301", "100", "0", "", 1);
-        insertInitialFlat(db, "302", "100", "0", "", 1);
-        insertInitialFlat(db, "303", "100", "0", "", 1);
-        insertInitialFlat(db, "304", "100", "0", "", 1);
+//        insertInitialFlat(db, "105", "100", "0", "", 1);
+//        insertInitialFlat(db, "106", "100", "0", "", 1);
+//        insertInitialFlat(db, "201", "100", "0", "", 1);
+//        insertInitialFlat(db, "202", "100", "0", "", 1);
+//        insertInitialFlat(db, "203", "100", "0", "", 1);
+//        insertInitialFlat(db, "204", "100", "0", "", 1);
+//        insertInitialFlat(db, "205", "100", "0", "", 1);
+//        insertInitialFlat(db, "206", "100", "0", "", 1);
+//        insertInitialFlat(db, "301", "100", "0", "", 1);
+//        insertInitialFlat(db, "302", "100", "0", "", 1);
+//        insertInitialFlat(db, "303", "100", "0", "", 1);
+//        insertInitialFlat(db, "304", "100", "0", "", 1);
         insertInitialFlat(db, "101", "100", "0", "", 2);
         insertInitialFlat(db, "102", "100", "0", "", 2);
         insertInitialFlat(db, "101", "100", "0", "", 3);
         insertInitialFlat(db, "102", "100", "0", "", 3);
         insertInitialFlat(db, "101", "100", "0", "", 4);
-        insertInitialFlat(db, "102", "100", "0", "", 4);
+//        insertInitialFlat(db, "102", "100", "0", "", 4);
 
         // Add more initial data as needed
         Log.d("DatabaseHelper", "Initial data inserted into database.");
@@ -139,6 +139,43 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.update(TABLE_FLATS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
     }
+
+    public void performUpdate() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // SQL statement to update all previous readings to the current reading
+        String updateQuery = "UPDATE " + TABLE_FLATS + " SET "
+                + COLUMN_PREVIOUS_READING + " = " + COLUMN_CURRENT_READING + ", "
+                + COLUMN_CURRENT_READING + " = ''";
+
+        // Execute the SQL statement
+        db.execSQL(updateQuery);
+    }
+
+    public List<Flat> getAllFlats() {
+        List<Flat> flatList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_FLATS;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Flat flat = new Flat(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FLAT_NUMBER)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PREVIOUS_READING)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_MAINTENANCE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENT_READING))
+                );
+                flatList.add(flat);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return flatList;
+    }
+
+
 
     public void logDatabaseValues() {
         SQLiteDatabase db = this.getReadableDatabase();

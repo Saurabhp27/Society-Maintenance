@@ -7,4 +7,10 @@
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="100"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_update"
+        android:icon="@drawable/updated"
+        android:title="Update"
+        app:showAsAction="ifRoom" />
 </menu>
