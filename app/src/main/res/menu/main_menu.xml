@@ -4,7 +4,8 @@
     <item
         android:id="@+id/action_settings"
         android:title="Settings"
-        android:icon="@android:drawable/ic_menu_preferences"
+        app:iconTint="#808080"
+        android:icon="@drawable/setting"
         android:orderInCategory="100"
         app:showAsAction="always" />
 
@@ -12,5 +13,12 @@
         android:id="@+id/action_update"
         android:icon="@drawable/updated"
         android:title="Update"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_lock"
+        android:icon="@drawable/lock"
+        android:title="Lock/Unlock"
+        app:iconTint="@color/red"
+        app:showAsAction="always" />
 </menu>

@@ -1,21 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:background="#FFFFFF"
+    android:gravity="center">
 
     <TextView
         android:id="@+id/dialog_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="This action will update the previous reading. Click on Update to update monthly reading."
-        android:textSize="16sp" />
+        android:text="Click the UPDATE button to set the current readings as the previous readings."
+        android:textSize="18sp"
+        android:textColor="#333333"
+        android:paddingBottom="16dp"
+        android:gravity="center"
+        android:textAlignment="center" />
 
     <Button
         android:id="@+id/dialog_update_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Update"
-        android:layout_gravity="center_horizontal" />
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#4CAF50"
+        android:padding="12dp"
+        android:layout_gravity="center_horizontal"
+        android:elevation="4dp"
+        android:layout_marginTop="8dp"/>
 </LinearLayout>

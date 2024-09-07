@@ -1,16 +1,23 @@
 package com.example.myapplication;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Environment;
@@ -31,6 +38,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -59,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private Button printButton;
     private int currentListType = 1;
     private static final int REQUEST_WRITE_PERMISSION = 786;
-
+    private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
+    public static boolean isLock = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
 //        Toolbar toolbar = findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
-
 
 
         dbHelper = new DatabaseHelper(this);
@@ -99,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         printButton.setOnClickListener(view -> {
             if (checkPermission()) {
                 boolean isSavedSuccessfully = saveAllReadings();
-                if(isSavedSuccessfully) {
+                if (isSavedSuccessfully) {
                     exportFlatsToPdf();
                 }
             } else {
@@ -118,8 +126,22 @@ public class MainActivity extends AppCompatActivity {
         // Load the default list (e.g., list 1)
         updateListView(1, button1);
 
-        dbHelper.logFlatsTableData();
+        // Create notification channel
+        createNotificationChannel();
+        // Check and request notification permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATION_PERMISSION);
+            }
 
+        }
+
+//        dbHelper.logFlatsTableData();
+
+    }
+
+    public static boolean getisLock(){
+        return isLock;
     }
 
     @Override
@@ -138,13 +160,34 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_update) {
-            updateprevreadingfunctonality();
+            if(isLock) {
+                updateprevreadingfunctonality();
+            }
+            return true;
+        }
+
+        if (id == R.id.action_lock) {
+            // Toggle the isLocked variable
+            isLock = !isLock;
+
+            // Change the icon background color based on isLocked state
+            if (isLock) {
+                item.getIcon().setTint(getResources().getColor(R.color.green)); // Green color when locked
+            } else {
+                item.getIcon().setTint(getResources().getColor(R.color.red)); // Red color when unlocked
+            }
+
+            Intent intent = new Intent("LOCK_STATE_CHANGED");
+            intent.putExtra("isLock", isLock);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-
+    public static boolean getIsLock() {
+        return isLock;
+    }
     private void updateprevreadingfunctonality() {
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_update, null);
@@ -189,7 +232,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
 //    int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
 
     private void showSetValuesDialog() {
@@ -218,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
         multiplierInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         multiplierInput.setText(String.valueOf(multiplier));
         multiplierInput.setHint("Enter water rate");
+        multiplierInput.setEnabled(isLock);
         layout.addView(multiplierInput);
 
         // Create TextView for fixed maintenance label
@@ -232,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
         fixedMaintenanceInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         fixedMaintenanceInput.setText(String.valueOf(fixedMaintenance));
         fixedMaintenanceInput.setHint("Enter fixed maintenance");
+        fixedMaintenanceInput.setEnabled(isLock);
         layout.addView(fixedMaintenanceInput);
 
         // Set the layout in the dialog
@@ -297,6 +341,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean saveAllReadings() {
+        if(!isLock){
+            Toast.makeText(this, "Fields Locked!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
         List<Flat> flats = flatAdapter.getFlats(); // Get all flats from adapter
         boolean allValid = true; // Flag to track if all readings are valid
 
@@ -371,7 +419,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     private Button getSelectedButton() {
         switch (currentListType) {
             case 1:
@@ -401,6 +448,7 @@ public class MainActivity extends AppCompatActivity {
                 return "unknown";
         }
     }
+
     public void exportFlatsToPdf() {
         // Get current date in MonthName_Date format
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM_dd", Locale.getDefault());
@@ -411,6 +459,7 @@ public class MainActivity extends AppCompatActivity {
             PdfWriter writer;
             PdfDocument pdfDocument;
             Document document;
+            Uri pdfUri = null;
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContentValues values = new ContentValues();
@@ -418,10 +467,10 @@ public class MainActivity extends AppCompatActivity {
                 values.put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf");
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
 
-                Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                pdfUri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
 
-                if (uri != null) {
-                    writer = new PdfWriter(getContentResolver().openOutputStream(uri));
+                if (pdfUri != null) {
+                    writer = new PdfWriter(getContentResolver().openOutputStream(pdfUri));
                     pdfDocument = new PdfDocument(writer);
                     document = new Document(pdfDocument);
 
@@ -430,10 +479,12 @@ public class MainActivity extends AppCompatActivity {
 
                     document.close();
                     Toast.makeText(this, "PDF saved successfully", Toast.LENGTH_LONG).show();
+                    showNotification(fileName, pdfUri);
                 }
             } else {
                 File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                 File filePath = new File(downloadsDir, fileName);
+                pdfUri = Uri.fromFile(filePath);
 
                 writer = new PdfWriter(new FileOutputStream(filePath));
                 pdfDocument = new PdfDocument(writer);
@@ -444,6 +495,7 @@ public class MainActivity extends AppCompatActivity {
 
                 document.close();
                 Toast.makeText(this, "PDF saved at " + filePath.getAbsolutePath(), Toast.LENGTH_LONG).show();
+                showNotification(fileName, pdfUri);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -524,19 +576,80 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Request permission for Android 10 and below
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
-        }    }
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == REQUEST_WRITE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                exportFlatsToPdf();
-            } else {
-                Toast.makeText(this, "Write permission is required to save the PDF", Toast.LENGTH_SHORT).show();
+        switch (requestCode) {
+            case REQUEST_WRITE_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    exportFlatsToPdf();
+                } else {
+                    Toast.makeText(this, "Write permission is required to save the PDF", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case REQUEST_NOTIFICATION_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, you can show notifications
+                    // Optionally, you can trigger a notification here if needed
+                } else {
+                    Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+        }
+    }
+
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "pdf_export_channel";
+            CharSequence name = "PDF Export Channel";
+            String description = "Channel for PDF export notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelId, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void showNotification(String fileName, Uri pdfUri) {
+        String channelId = "pdf_export_channel";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Check if the POST_NOTIFICATIONS permission is granted
+            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                // Permission is not granted, do not show notification
+                Toast.makeText(this, "Notification permission not granted", Toast.LENGTH_SHORT).show();
+                return;
             }
         }
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(pdfUri, "application/pdf");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.img) // Replace with your app's notification icon
+                .setContentTitle("PDF Exported")
+                .setContentText("Your PDF has been saved as " + fileName)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(1, builder.build());
     }
 
 }

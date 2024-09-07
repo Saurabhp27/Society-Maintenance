@@ -1,6 +1,9 @@
 package com.example.myapplication;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -13,16 +16,39 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import java.util.List;
 
 public class FlatAdapter extends ArrayAdapter<Flat> {
     private List<Flat> flats;
     private Context context;
+    private boolean isLock;
 
     public FlatAdapter(Context context, List<Flat> flats) {
         super(context, 0, flats);
         this.context = context;
         this.flats = flats;
+        this.isLock = MainActivity.getIsLock();
+        LocalBroadcastManager.getInstance(context).registerReceiver(lockChangeReceiver,
+                new IntentFilter("LOCK_STATE_CHANGED"));
+    }
+
+    private final BroadcastReceiver lockChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean newLockState = intent.getBooleanExtra("isLock", false);
+            isLock = newLockState;
+            // Update your UI components as needed
+            notifyDataSetChanged();
+        }
+    };
+
+    @Override
+    public void finalize() throws Throwable {
+        super.finalize();
+        // Unregister the receiver when the adapter is no longer needed
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(lockChangeReceiver);
     }
 
     @Override
@@ -41,6 +67,7 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
         TextView totalMaintenance = convertView.findViewById(R.id.totalMaintenance);
 
         // Set the values
+        currentReading.setEnabled(isLock);
         flatNumber.setText(flat.getFlatNumber());
         previousReading.setText("Previous: " + flat.getPreviousReading());
         currentReading.setText(flat.getCurrentReading() != null ? flat.getCurrentReading() : ""); // Set current reading
@@ -57,7 +84,7 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String currentReadingValue = s.toString();
-                flat.setCurrentReading(currentReadingValue); // Update the flat object
+                flat.setCurrentReading(currentReadingValue);
 
                 if (!currentReadingValue.isEmpty()) {
                     try {
@@ -101,6 +128,8 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
         Button buttonSave = dialogView.findViewById(R.id.buttonSave);
         // Set initial value
         editTextPreviousReading.setText(flat.getPreviousReading());
+
+        editTextPreviousReading.setEnabled(isLock);
 
         AlertDialog dialog = builder.create();
         dialog.show();
