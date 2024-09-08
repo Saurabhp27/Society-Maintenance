@@ -92,7 +92,7 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                         int previousReadingInt = Integer.parseInt(flat.getPreviousReading());
                         int multiplier = PreferenceUtils.getMultiplier(context);
                         int fixmaintainance = PreferenceUtils.getFixedMaintenance(context);
-                        if (currentReadingInt > previousReadingInt) {
+                        if (currentReadingInt >= previousReadingInt) {
                             int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + fixmaintainance;
                             totalMaintenance.setText("₹ " + maintenance);
                             flat.updateTotalMaintenance(currentReadingInt,context);

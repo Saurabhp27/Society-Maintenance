@@ -9,15 +9,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<!--    <androidx.appcompat.widget.Toolbar-->
-<!--        android:id="@+id/toolbar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="?attr/colorPrimary"-->
-<!--        android:elevation="4dp"-->
-<!--        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />-->
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -64,21 +55,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <!-- Save Button -->
         <Button
             android:id="@+id/saveButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Save"/>
+            android:text="Save"
+            android:textColor="@color/button_text_color"
+            android:backgroundTint="@color/button_primary_color" />
 
-        <!-- Print Button -->
         <Button
             android:id="@+id/printButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Save and Print"/>
+            android:text="Save and Print"
+            android:textColor="@color/button_text_color"
+            android:backgroundTint="@color/button_secondary_color" />
 
     </LinearLayout>
 

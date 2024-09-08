@@ -4,7 +4,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="#FFFFFF"
     android:gravity="center">
 
     <TextView
@@ -13,7 +12,6 @@
         android:layout_height="wrap_content"
         android:text="Click the UPDATE button to set the current readings as the previous readings."
         android:textSize="18sp"
-        android:textColor="#333333"
         android:paddingBottom="16dp"
         android:gravity="center"
         android:textAlignment="center" />
@@ -23,10 +21,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Update"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#4CAF50"
+        android:textColor="@color/button_text_color"
+        android:backgroundTint="@color/button_secondary_color"
         android:padding="12dp"
         android:layout_gravity="center_horizontal"
         android:elevation="4dp"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp" />
 </LinearLayout>

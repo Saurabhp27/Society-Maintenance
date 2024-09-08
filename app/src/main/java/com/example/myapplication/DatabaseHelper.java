@@ -62,45 +62,93 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Method to insert initial data into the database
     private void insertInitialData(SQLiteDatabase db) {
-        insertInitialFlat(db, "101", "100", "0", "", 1);
-        insertInitialFlat(db, "102", "100", "0", "", 1);
-        insertInitialFlat(db, "103", "100", "0", "", 1);
-        insertInitialFlat(db, "104", "100", "0", "", 1);
-//        insertInitialFlat(db, "105", "100", "0", "", 1);
-//        insertInitialFlat(db, "106", "100", "0", "", 1);
-//        insertInitialFlat(db, "201", "100", "0", "", 1);
-//        insertInitialFlat(db, "202", "100", "0", "", 1);
-//        insertInitialFlat(db, "203", "100", "0", "", 1);
-//        insertInitialFlat(db, "204", "100", "0", "", 1);
-//        insertInitialFlat(db, "205", "100", "0", "", 1);
-//        insertInitialFlat(db, "206", "100", "0", "", 1);
-//        insertInitialFlat(db, "301", "100", "0", "", 1);
-//        insertInitialFlat(db, "302", "100", "0", "", 1);
-//        insertInitialFlat(db, "303", "100", "0", "", 1);
-//        insertInitialFlat(db, "304", "100", "0", "", 1);
-        insertInitialFlat(db, "101", "100", "0", "", 2);
-        insertInitialFlat(db, "102", "100", "0", "", 2);
-        insertInitialFlat(db, "101", "100", "0", "", 3);
-        insertInitialFlat(db, "102", "100", "0", "", 3);
-        insertInitialFlat(db, "101", "100", "0", "", 4);
-//        insertInitialFlat(db, "102", "100", "0", "", 4);
+        insertInitialFlat(db, "101", "110", "0", "", 1);
+        insertInitialFlat(db, "102", "88", "0", "", 1);
+        insertInitialFlat(db, "103", "71", "0", "", 1);
+        insertInitialFlat(db, "104", "128", "0", "", 1);
+        insertInitialFlat(db, "201", "62", "0", "", 1);
+        insertInitialFlat(db, "202", "135", "0", "", 1);
+        insertInitialFlat(db, "203", "82", "0", "", 1);
+        insertInitialFlat(db, "204", "79", "0", "", 1);
+        insertInitialFlat(db, "301", "88", "0", "", 1);
+        insertInitialFlat(db, "302", "120", "0", "", 1);
+        insertInitialFlat(db, "303", "110", "0", "", 1);
+        insertInitialFlat(db, "304", "16", "0", "", 1);
+        insertInitialFlat(db, "401", "43", "0", "", 1);
+        insertInitialFlat(db, "402", "108", "0", "", 1);
+        insertInitialFlat(db, "403", "83", "0", "", 1);
+        insertInitialFlat(db, "404", "44", "0", "", 1);
+
+        insertInitialFlat(db, "101", "50", "0", "", 2);
+        insertInitialFlat(db, "102", "108", "0", "", 2);
+        insertInitialFlat(db, "103", "66", "0", "", 2);
+        insertInitialFlat(db, "104", "122", "0", "", 2);
+        insertInitialFlat(db, "105", "35", "0", "", 2);
+        insertInitialFlat(db, "106", "35", "0", "", 2);
+        insertInitialFlat(db, "201", "65", "0", "", 2);
+        insertInitialFlat(db, "202", "108", "0", "", 2);
+        insertInitialFlat(db, "203", "40", "0", "", 2);
+        insertInitialFlat(db, "204", "126", "0", "", 2);
+        insertInitialFlat(db, "205", "122", "0", "", 2);
+        insertInitialFlat(db, "206", "44", "0", "", 2);
+        insertInitialFlat(db, "301", "67", "0", "", 2);
+        insertInitialFlat(db, "302", "173", "0", "", 2);
+        insertInitialFlat(db, "303", "70", "0", "", 2);
+        insertInitialFlat(db, "304", "95", "0", "", 2);
+        insertInitialFlat(db, "305", "94", "0", "", 2);
+        insertInitialFlat(db, "306", "51", "0", "", 2);
+        insertInitialFlat(db, "401", "92", "0", "", 2);
+        insertInitialFlat(db, "402", "81", "0", "", 2);
+        insertInitialFlat(db, "403", "38", "0", "", 2);
+        insertInitialFlat(db, "404", "55", "0", "", 2);
+        insertInitialFlat(db, "405", "86", "0", "", 2);
+        insertInitialFlat(db, "406", "65", "0", "", 2);
+
+
+        insertInitialFlat(db, "101", "118", "0", "", 3);
+        insertInitialFlat(db, "102", "94", "0", "", 3);
+        insertInitialFlat(db, "103", "92", "0", "", 3);
+        insertInitialFlat(db, "104", "144", "0", "", 3);
+        insertInitialFlat(db, "201", "267", "0", "", 3);
+        insertInitialFlat(db, "202", "131", "0", "", 3);
+        insertInitialFlat(db, "203", "106", "0", "", 3);
+        insertInitialFlat(db, "204", "196", "0", "", 3);
+        insertInitialFlat(db, "301", "109", "0", "", 3);
+        insertInitialFlat(db, "302", "82", "0", "", 3);
+        insertInitialFlat(db, "303", "56", "0", "", 3);
+        insertInitialFlat(db, "304", "123", "0", "", 3);
+        insertInitialFlat(db, "401", "99", "0", "", 3);
+        insertInitialFlat(db, "402", "72", "0", "", 3);
+        insertInitialFlat(db, "403", "35", "0", "", 3);
+        insertInitialFlat(db, "404", "86", "0", "", 3);
+
+        insertInitialFlat(db, "101", "65", "0", "", 4);
+        insertInitialFlat(db, "102", "113", "0", "", 4);
+        insertInitialFlat(db, "103", "107", "0", "", 4);
+        insertInitialFlat(db, "104", "99", "0", "", 4);
+        insertInitialFlat(db, "105", "83", "0", "", 4);
+        insertInitialFlat(db, "106", "228", "0", "", 4);
+        insertInitialFlat(db, "201", "85", "0", "", 4);
+        insertInitialFlat(db, "202", "200", "0", "", 4);
+        insertInitialFlat(db, "203", "134", "0", "", 4);
+        insertInitialFlat(db, "204", "66", "0", "", 4);
+        insertInitialFlat(db, "205", "115", "0", "", 4);
+        insertInitialFlat(db, "206", "140", "0", "", 4);
+        insertInitialFlat(db, "301", "179", "0", "", 4);
+        insertInitialFlat(db, "302", "148", "0", "", 4);
+        insertInitialFlat(db, "303", "198", "0", "", 4);
+        insertInitialFlat(db, "304", "6", "0", "", 4);
+        insertInitialFlat(db, "305", "169", "0", "", 4);
+        insertInitialFlat(db, "306", "79", "0", "", 4);
+        insertInitialFlat(db, "401", "209", "0", "", 4);
+        insertInitialFlat(db, "402", "104", "0", "", 4);
+        insertInitialFlat(db, "403", "95", "0", "", 4);
+        insertInitialFlat(db, "404", "137", "0", "", 4);
+        insertInitialFlat(db, "405", "66", "0", "", 4);
+        insertInitialFlat(db, "406", "136", "0", "", 4);
 
         // Add more initial data as needed
         Log.d("DatabaseHelper", "Initial data inserted into database.");
-    }
-
-    public void insertFlat(String flatNumber, String previousReading, String totalMaintenance, String currentReading, int listType) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_FLAT_NUMBER, flatNumber);
-        values.put(COLUMN_PREVIOUS_READING, previousReading);
-        values.put(COLUMN_TOTAL_MAINTENANCE, totalMaintenance);
-        values.put(COLUMN_CURRENT_READING, currentReading); // Insert this value
-        values.put(COLUMN_LIST_TYPE, listType);
-
-        db.insert(TABLE_FLATS, null, values);
-        db.close();
     }
 
     public List<Flat> getFlatsByListType(int listType) {
@@ -175,42 +223,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return flatList;
     }
 
-
-
-    public void logDatabaseValues() {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        // Query to select all rows from the flats table
-        String selectQuery = "SELECT * FROM " + TABLE_FLATS;
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        // Check if there are results
-        if (cursor.moveToFirst()) {
-            do {
-                // Retrieve values from the cursor
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                String flatNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FLAT_NUMBER));
-                String previousReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PREVIOUS_READING));
-                String totalMaintenance = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_MAINTENANCE));
-                String currentReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENT_READING));
-                int listType = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LIST_TYPE));
-
-                // Log the values
-                Log.d("DatabaseHelper", "ID: " + id +
-                        ", Flat Number: " + flatNumber +
-                        ", Previous Reading: " + previousReading +
-                        ", Total Maintenance: " + totalMaintenance +
-                        ", Current Reading: " + currentReading +
-                        ", List Type: " + listType);
-            } while (cursor.moveToNext());
-        } else {
-            Log.d("DatabaseHelper", "No data found in the database.");
-        }
-
-        cursor.close();
-        db.close();
-    }
-
     public void updateFlatPreviousReading(int id, String previousReading) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -220,36 +232,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.update(TABLE_FLATS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
     }
-
-    public void logFlatsTableData() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String selectQuery = "SELECT * FROM " + TABLE_FLATS;
-
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                String flatNumber = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FLAT_NUMBER));
-                String previousReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PREVIOUS_READING));
-                String totalMaintenance = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TOTAL_MAINTENANCE));
-                String currentReading = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CURRENT_READING));
-                int listType = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_LIST_TYPE));
-
-                Log.d("FlatTableData", "ID: " + id +
-                        ", Flat Number: " + flatNumber +
-                        ", Previous Reading: " + previousReading +
-                        ", Total Maintenance: " + totalMaintenance +
-                        ", Current Reading: " + currentReading +
-                        ", List Type: " + listType);
-            } while (cursor.moveToNext());
-        } else {
-            Log.d("FlatTableData", "No data found in the flats table.");
-        }
-
-        cursor.close();
-    }
-
 
 }
 

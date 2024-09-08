@@ -81,12 +81,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-//        PreferenceUtils.updateMultiplier(this, 25);
-
-//        Toolbar toolbar = findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-
-
         dbHelper = new DatabaseHelper(this);
 
         // Initialize ListView and Buttons
@@ -136,12 +130,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-//        dbHelper.logFlatsTableData();
-
-    }
-
-    public static boolean getisLock(){
-        return isLock;
     }
 
     @Override
@@ -172,9 +160,9 @@ public class MainActivity extends AppCompatActivity {
 
             // Change the icon background color based on isLocked state
             if (isLock) {
-                item.getIcon().setTint(getResources().getColor(R.color.green)); // Green color when locked
+                item.getIcon().setTint(getResources().getColor(R.color.button_secondary_color)); // Green color when locked
             } else {
-                item.getIcon().setTint(getResources().getColor(R.color.red)); // Red color when unlocked
+                item.getIcon().setTint(getResources().getColor(R.color.lock_icon_unlocked_color)); // Red color when unlocked
             }
 
             Intent intent = new Intent("LOCK_STATE_CHANGED");
@@ -231,8 +219,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-//    int fixmaintainance = PreferenceUtils.getFixedMaintenance(this);
 
     private void showSetValuesDialog() {
         // Get current values from SharedPreferences
@@ -328,16 +314,16 @@ public class MainActivity extends AppCompatActivity {
         // Change the color of the selected button
         resetButtonColors();
         if (selectedButton != null) {
-            selectedButton.setBackgroundColor(getResources().getColor(R.color.selected_button_color));
+            selectedButton.setBackgroundColor(getResources().getColor(R.color.wing_button_selected_color));
         }
         currentListType = listType; // Update the current list type
     }
 
     private void resetButtonColors() {
-        button1.setBackgroundColor(getResources().getColor(R.color.default_button_color));
-        button2.setBackgroundColor(getResources().getColor(R.color.default_button_color));
-        button3.setBackgroundColor(getResources().getColor(R.color.default_button_color));
-        button4.setBackgroundColor(getResources().getColor(R.color.default_button_color));
+        button1.setBackgroundColor(getResources().getColor(R.color.wing_button_default_color));
+        button2.setBackgroundColor(getResources().getColor(R.color.wing_button_default_color));
+        button3.setBackgroundColor(getResources().getColor(R.color.wing_button_default_color));
+        button4.setBackgroundColor(getResources().getColor(R.color.wing_button_default_color));
     }
 
     private boolean saveAllReadings() {
@@ -376,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else {
             // If any reading was invalid, show the error message
-            Toast.makeText(this, "All Readings should be greater than previous reading", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "All Readings should be greater than or equal to previous reading", Toast.LENGTH_SHORT).show();
             return false;
         }
     }
@@ -643,7 +629,7 @@ public class MainActivity extends AppCompatActivity {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.img) // Replace with your app's notification icon
                 .setContentTitle("PDF Exported")
-                .setContentText("Your PDF has been saved as " + fileName)
+                .setContentText("Your PDF " + fileName + " saved in Downloads")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true);

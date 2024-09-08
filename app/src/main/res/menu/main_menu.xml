@@ -4,21 +4,23 @@
     <item
         android:id="@+id/action_settings"
         android:title="Settings"
-        app:iconTint="#808080"
-        android:icon="@drawable/setting"
-        android:orderInCategory="100"
+        app:iconTint="#FFFFFF"
+        android:icon="@drawable/settings4"
+        android:orderInCategory="200"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_update"
-        android:icon="@drawable/updated"
+        android:icon="@drawable/sync"
+        android:orderInCategory="100"
+        app:iconTint="#FFFFFF"
         android:title="Update"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_lock"
-        android:icon="@drawable/lock"
+        android:icon="@drawable/lock3"
         android:title="Lock/Unlock"
-        app:iconTint="@color/red"
+        app:iconTint="@color/lock_icon_unlocked_color"
         app:showAsAction="always" />
 </menu>

@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Button Colors -->
+    <color name="button_primary_color">#3F51B5</color> <!-- A deep blue for primary actions -->
+    <color name="button_secondary_color">#009688</color> <!-- A teal color for secondary actions -->
+    <color name="button_text_color">#FFFFFF</color> <!-- White text color for buttons -->
 
+    <!-- Menu Icon Colors -->
+    <color name="menu_icon_color">#757575</color> <!-- A medium gray for icons -->
+    <color name="menu_icon_color_active">#FF5722</color> <!-- A vibrant orange for active icons -->
 
-    <!-- Default button color -->
-    <color name="button_default">#3F51B5</color>
+    <!-- Background Tint Colors -->
+    <color name="button_background_color">#E0E0E0</color> <!-- Light gray for button background in modal -->
+    <color name="button_background_color_active">#FF5722</color> <!-- Orange for active state background -->
 
-    <!-- Selected button color -->
-    <color name="button_selected">#4CAF50</color>
+    <color name="wing_button_default_color">#B0BEC5</color> <!-- Light Grayish Blue for default state -->
+    <color name="wing_button_selected_color">#FF5722</color> <!-- Orange for selected state -->
+    <color name="wing_button_text_color">#FFFFFF</color> <!-- White text color for better contrast -->
 
-    <color name="selected_button_color">#FF4081</color> <!-- Example color for selected button -->
-    <color name="default_button_color">#D3D3D3</color>  <!-- Example color for default button -->
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
-    <color name="background">#FFFFFF</color>
-
-    <color name="green">#00FF00</color>
-    <color name="red">#FF0000</color>
-
+    <color name="lock_icon_locked_color">#4CAF50</color> <!-- Green for locked state -->
+    <color name="lock_icon_unlocked_color">#F44336</color>
 </resources>
