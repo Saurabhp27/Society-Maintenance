@@ -9,6 +9,8 @@ public class PreferenceUtils {
     private static final String KEY_FIXED_MAINTENANCE = "fixed_maintenance";
     private static final int DEFAULT_MULTIPLIER = 25;
     private static final int DEFAULT_FIXED_MAINTENANCE = 500;
+    private static final String Index_month = "index_month";
+    private static final int Index_month_default= 8;
 
     public static void updateMultiplier(Context context, int multiplier) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -33,6 +35,18 @@ public class PreferenceUtils {
     public static int getFixedMaintenance(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         return prefs.getInt(KEY_FIXED_MAINTENANCE, DEFAULT_FIXED_MAINTENANCE); // Default to 500 if not set
+    }
+
+    public static void updateIndexmonth(Context context, int index_month) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(Index_month, index_month);
+        editor.apply();
+    }
+
+    public static int getIndex_month(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return prefs.getInt(Index_month, Index_month_default);
     }
 
 }

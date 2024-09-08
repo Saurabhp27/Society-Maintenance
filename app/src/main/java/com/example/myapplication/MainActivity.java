@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_WRITE_PERMISSION = 786;
     private static final int REQUEST_NOTIFICATION_PERMISSION = 1;
     public static boolean isLock = false;
+    private String[] months = {"January","February","March","April","May","June", "July", "August","September", "October", "November", "December" };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,7 +220,10 @@ public class MainActivity extends AppCompatActivity {
                             // Handle the update action
                             if (saveAllReadingsForAllFlats()) {
                                 dbHelper.performUpdate();
+                                int newindex_month = ((PreferenceUtils.getIndex_month(MainActivity.this)) +1) % 13;
+                                PreferenceUtils.updateIndexmonth(MainActivity.this, newindex_month);
                                 updateListView(currentListType, getSelectedButton());
+
                             }
                             // Close the outer dialog as well
                             outerDialog.dismiss();
@@ -230,10 +234,7 @@ public class MainActivity extends AppCompatActivity {
                             // Close the outer dialog when "No" is clicked
                             outerDialog.dismiss();
                         }
-                    })
-                // Show confirmation dialog
-
-                        .show();
+                    }).show();
             }
         });
     }
@@ -455,10 +456,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void exportFlatsToPdf() {
-        // Get current date in MonthName_Date format
-        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM_dd", Locale.getDefault());
-        String currentDate = dateFormat.format(new Date());
-        String fileName = getListName() + "_" + currentDate + "_records.pdf";
+
+        int index_month = PreferenceUtils.getIndex_month(this);
+        String fileName = getListName() + "_" + months[index_month] + "_records.pdf";
 
         try {
             PdfWriter writer;
@@ -484,6 +484,7 @@ public class MainActivity extends AppCompatActivity {
 
                     document.close();
                     showPdfSavedDialog(fileName, pdfUri);
+                    showNotification(fileName, pdfUri);
                 }
             } else {
                 File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -499,6 +500,7 @@ public class MainActivity extends AppCompatActivity {
 
                 document.close();
                 showPdfSavedDialog(fileName, pdfUri);
+                showNotification(fileName, pdfUri);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -530,14 +532,16 @@ public class MainActivity extends AppCompatActivity {
         List<Flat> flats = flatAdapter.getFlats();
         int multiplier = PreferenceUtils.getMultiplier(this);
         int fixMaintenance = PreferenceUtils.getFixedMaintenance(this);
+        int index_month = PreferenceUtils.getIndex_month(this);
+        String updatemonth = months[index_month];
 
         // Create a table with a single cell for the heading
         Table headingTable = new Table(1);
-        headingTable.addCell(new Cell().add(new Paragraph(getListName()).setFontSize(20).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+        headingTable.addCell(new Cell().add(new Paragraph(getListName() + " " + updatemonth + " Report").setFontSize(25).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
 
         // Add the date below the heading
         String currentDate = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(new Date());
-        headingTable.addCell(new Cell().add(new Paragraph(currentDate).setFontSize(12)).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+        headingTable.addCell(new Cell().add(new Paragraph("Date: " +currentDate).setFontSize(17).setBold()).setTextAlignment(TextAlignment.LEFT).setBorder(Border.NO_BORDER));
 
         // Create the main table with 8 columns
         Table table = new Table(8);

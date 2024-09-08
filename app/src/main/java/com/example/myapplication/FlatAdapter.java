@@ -95,9 +95,11 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                         if (currentReadingInt >= previousReadingInt) {
                             int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + fixmaintainance;
                             totalMaintenance.setText("₹ " + maintenance);
-                            flat.updateTotalMaintenance(currentReadingInt,context);
+                            flat.updateTotalMaintenance(currentReadingInt,true,context);
                         } else {
                             totalMaintenance.setText("Invalid input");
+                            flat.updateTotalMaintenance(currentReadingInt,false,context);
+
                         }
                     } catch (NumberFormatException e) {
                         totalMaintenance.setText("Invalid input");

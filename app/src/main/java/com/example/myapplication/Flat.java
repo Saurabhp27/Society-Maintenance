@@ -37,12 +37,16 @@ public class Flat {
         return totalMaintenance;
     }
 
-    public void updateTotalMaintenance(int currentReading, Context context) {
-        int multiplier = PreferenceUtils.getMultiplier(context);
-        int fixedMaintenance = PreferenceUtils.getFixedMaintenance(context);
-        int previousReadingInt = Integer.parseInt(previousReading);
-        int maintenance = ((currentReading - previousReadingInt) * multiplier ) + fixedMaintenance;
-        this.totalMaintenance = String.valueOf(maintenance);
+    public void updateTotalMaintenance(int currentReading,boolean validvalue, Context context) {
+        if(!validvalue){
+            this.totalMaintenance ="Invalid Value";
+        }else {
+            int multiplier = PreferenceUtils.getMultiplier(context);
+            int fixedMaintenance = PreferenceUtils.getFixedMaintenance(context);
+            int previousReadingInt = Integer.parseInt(previousReading);
+            int maintenance = ((currentReading - previousReadingInt) * multiplier) + fixedMaintenance;
+            this.totalMaintenance = String.valueOf(maintenance);
+        }
     }
 
     public String getCurrentReading() {
