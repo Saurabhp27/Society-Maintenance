@@ -136,7 +136,21 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
 
         buttonSave.setOnClickListener(v -> {
             String newPreviousReading = editTextPreviousReading.getText().toString();
+            String currentReading = flat.getCurrentReading(); // Assuming this returns a String
+
             if (!newPreviousReading.isEmpty()) {
+                // Check if currentReading is not empty before comparing
+                if (!currentReading.isEmpty()) {
+                    int newPreviousReadingInt = Integer.parseInt(newPreviousReading);
+                    int currentReadingInt = Integer.parseInt(currentReading);
+
+                    // Check if newPreviousReading is greater than currentReading
+                    if (newPreviousReadingInt > currentReadingInt) {
+                        Toast.makeText(context, "Previous reading cannot be greater than Current reading", Toast.LENGTH_SHORT).show();
+                        return; // Exit early if the condition is met
+                    }
+                }
+
                 // Update the Flat object
                 flat.setPreviousReading(newPreviousReading);
 
@@ -151,6 +165,7 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                 Toast.makeText(context, "Previous reading cannot be empty", Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 
 

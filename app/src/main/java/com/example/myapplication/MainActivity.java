@@ -155,19 +155,38 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.action_lock) {
-            // Toggle the isLocked variable
-            isLock = !isLock;
+            // Check if the current state is locked and the user is trying to unlock it
+            if (!isLock) {
+                // Show confirmation dialog before unlocking
+                new AlertDialog.Builder(this)
+                        .setTitle("Confirm Unlock")
+                        .setMessage("Are you sure you want to unlock?")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            // User confirmed to unlock, toggle the isLock variable
+                            isLock = true;
 
-            // Change the icon background color based on isLocked state
-            if (isLock) {
-                item.getIcon().setTint(getResources().getColor(R.color.button_secondary_color)); // Green color when locked
+                            // Change the icon background color based on isLocked state
+                            item.getIcon().setTint(getResources().getColor(R.color.button_secondary_color)); // Red color when unlocked
+
+                            // Broadcast the lock state change
+                            Intent intent = new Intent("LOCK_STATE_CHANGED");
+                            intent.putExtra("isLock", isLock);
+                            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                        })
+                        .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                        .show();
             } else {
-                item.getIcon().setTint(getResources().getColor(R.color.lock_icon_unlocked_color)); // Red color when unlocked
-            }
 
-            Intent intent = new Intent("LOCK_STATE_CHANGED");
-            intent.putExtra("isLock", isLock);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                isLock = false;
+
+                // Change the icon background color based on isLocked state
+                item.getIcon().setTint(getResources().getColor(R.color.lock_icon_unlocked_color)); // Green color when locked
+
+                // Broadcast the lock state change
+                Intent intent = new Intent("LOCK_STATE_CHANGED");
+                intent.putExtra("isLock", isLock);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            }
             return true;
         }
 
@@ -192,28 +211,28 @@ public class MainActivity extends AppCompatActivity {
         Button updateButton = dialogView.findViewById(R.id.dialog_update_button);
         updateButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) {new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Confirm Update")
+                    .setMessage("Are you sure you want to update?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Handle the update action
+                            if (saveAllReadingsForAllFlats()) {
+                                dbHelper.performUpdate();
+                                updateListView(currentListType, getSelectedButton());
+                            }
+                            // Close the outer dialog as well
+                            outerDialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Close the outer dialog when "No" is clicked
+                            outerDialog.dismiss();
+                        }
+                    })
                 // Show confirmation dialog
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Confirm Update")
-                        .setMessage("Are you sure you want to update?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Handle the update action
-                                if (saveAllReadingsForAllFlats()) {
-                                    dbHelper.performUpdate();
-                                    updateListView(currentListType, getSelectedButton());
-                                }
-                                // Close the outer dialog as well
-                                outerDialog.dismiss();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // Close the outer dialog when "No" is clicked
-                                outerDialog.dismiss();
-                            }
-                        })
+
                         .show();
             }
         });
@@ -464,8 +483,7 @@ public class MainActivity extends AppCompatActivity {
                     document.add(createTable());
 
                     document.close();
-                    Toast.makeText(this, "PDF saved successfully", Toast.LENGTH_LONG).show();
-                    showNotification(fileName, pdfUri);
+                    showPdfSavedDialog(fileName, pdfUri);
                 }
             } else {
                 File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
@@ -480,17 +498,33 @@ public class MainActivity extends AppCompatActivity {
                 document.add(createTable());
 
                 document.close();
-                Toast.makeText(this, "PDF saved at " + filePath.getAbsolutePath(), Toast.LENGTH_LONG).show();
-                showNotification(fileName, pdfUri);
+                showPdfSavedDialog(fileName, pdfUri);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error saving PDF: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            showErrorDialog("Error saving PDF: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "An unexpected error occurred: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            showErrorDialog("An unexpected error occurred: " + e.getMessage());
         }
     }
+
+    private void showPdfSavedDialog(String fileName, Uri pdfUri) {
+        new AlertDialog.Builder(this)
+                .setTitle("PDF Saved")
+                .setMessage("PDF saved successfully as " + fileName + " in Downloads")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void showErrorDialog(String message) {
+        new AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
 
     private Table createTable() {
         List<Flat> flats = flatAdapter.getFlats();
@@ -627,7 +661,7 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.img) // Replace with your app's notification icon
+                .setSmallIcon(R.drawable.logo2) // Replace with your app's notification icon
                 .setContentTitle("PDF Exported")
                 .setContentText("Your PDF " + fileName + " saved in Downloads")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
