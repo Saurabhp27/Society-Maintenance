@@ -28,10 +28,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -214,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {new AlertDialog.Builder(MainActivity.this)
                     .setTitle("Confirm Update")
-                    .setMessage("Are you sure you want to update?")
+                    .setMessage("This action is irreversible and cannot be undone, Are you sure you want to update?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // Handle the update action
@@ -284,6 +286,25 @@ public class MainActivity extends AppCompatActivity {
         fixedMaintenanceInput.setEnabled(isLock);
         layout.addView(fixedMaintenanceInput);
 
+        // Create TextView for month label
+        TextView monthLabel = new TextView(this);
+        monthLabel.setText("Select Month:");
+        monthLabel.setTextSize(16);
+        monthLabel.setPadding(0, 20, 0, 5);
+        layout.addView(monthLabel);
+
+        // Create Spinner for month selection
+        final Spinner monthSpinner = new Spinner(this);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.months_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        monthSpinner.setAdapter(adapter);
+
+        int index_spinner = PreferenceUtils.getIndex_month(this);
+        monthSpinner.setSelection(index_spinner);
+        monthSpinner.setEnabled(isLock);
+        layout.addView(monthSpinner);
+
         // Set the layout in the dialog
         builder.setView(layout);
 
@@ -299,6 +320,10 @@ public class MainActivity extends AppCompatActivity {
                     // Get and save the fixed maintenance
                     int newFixedMaintenance = Integer.parseInt(fixedMaintenanceInput.getText().toString());
                     PreferenceUtils.updateFixedMaintenance(MainActivity.this, newFixedMaintenance);
+
+                    // Get and save the selected month
+                    int selectedMonth = monthSpinner.getSelectedItemPosition();
+                    PreferenceUtils.updateIndexmonth(MainActivity.this, selectedMonth);
 
                     Toast.makeText(MainActivity.this, "Values updated successfully", Toast.LENGTH_SHORT).show();
                 } catch (NumberFormatException e) {
@@ -318,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
         // Show the dialog
         builder.show();
     }
+
 
 
     private void updateListView(int listType, Button selectedButton) {
@@ -537,7 +563,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a table with a single cell for the heading
         Table headingTable = new Table(1);
-        headingTable.addCell(new Cell().add(new Paragraph(getListName() + " " + updatemonth + " Report").setFontSize(25).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+        headingTable.addCell(new Cell().add(new Paragraph(getListName() + " " + updatemonth + " Maintenance").setFontSize(25).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
 
         // Add the date below the heading
         String currentDate = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(new Date());

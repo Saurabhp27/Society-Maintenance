@@ -14,7 +14,7 @@
     <color name="button_background_color_active">#FF5722</color> <!-- Orange for active state background -->
 
     <color name="wing_button_default_color">#B0BEC5</color> <!-- Light Grayish Blue for default state -->
-    <color name="wing_button_selected_color">#FF5722</color> <!-- Orange for selected state -->
+    <color name="wing_button_selected_color">#6d8c87</color> <!-- Orange for selected state -->
     <color name="wing_button_text_color">#FFFFFF</color> <!-- White text color for better contrast -->
 
     <color name="lock_icon_locked_color">#4CAF50</color> <!-- Green for locked state -->
