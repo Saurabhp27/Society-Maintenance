@@ -66,6 +66,11 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
         TextView previousReading = convertView.findViewById(R.id.previousReading);
         TextView totalMaintenance = convertView.findViewById(R.id.totalMaintenance);
 
+        // Remove any existing TextWatcher before adding a new one
+        if (currentReading.getTag() instanceof TextWatcher) {
+            currentReading.removeTextChangedListener((TextWatcher) currentReading.getTag());
+        }
+
         // Set the values
         currentReading.setEnabled(isLock);
         flatNumber.setText(flat.getFlatNumber());
@@ -76,8 +81,8 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
         // Set cursor to the end of the text
         currentReading.setSelection(currentReading.getText().length());
 
-        // Add a TextWatcher to dynamically update the total maintenance as the user types
-        currentReading.addTextChangedListener(new TextWatcher() {
+        // Create a new TextWatcher and attach it to the current EditText
+        TextWatcher textWatcher = new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
@@ -91,15 +96,14 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                         int currentReadingInt = Integer.parseInt(currentReadingValue);
                         int previousReadingInt = Integer.parseInt(flat.getPreviousReading());
                         int multiplier = PreferenceUtils.getMultiplier(context);
-                        int fixmaintainance = PreferenceUtils.getFixedMaintenance(context);
+                        int fixedMaintenance = PreferenceUtils.getFixedMaintenance(context);
                         if (currentReadingInt >= previousReadingInt) {
-                            int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + fixmaintainance;
+                            int maintenance = ((currentReadingInt - previousReadingInt) * multiplier) + fixedMaintenance;
                             totalMaintenance.setText("₹ " + maintenance);
-                            flat.updateTotalMaintenance(currentReadingInt,true,context);
+                            flat.updateTotalMaintenance(currentReadingInt, true, context);
                         } else {
                             totalMaintenance.setText("Invalid input");
-                            flat.updateTotalMaintenance(currentReadingInt,false,context);
-
+                            flat.updateTotalMaintenance(currentReadingInt, false, context);
                         }
                     } catch (NumberFormatException e) {
                         totalMaintenance.setText("Invalid input");
@@ -111,14 +115,18 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
 
             @Override
             public void afterTextChanged(Editable s) {}
-        });
+        };
+
+        currentReading.addTextChangedListener(textWatcher);
+
+        // Store the TextWatcher as a tag so it can be removed later
+        currentReading.setTag(textWatcher);
 
         // Make previousReading clickable and show dialog when clicked
         previousReading.setOnClickListener(v -> showUpdateDialog(flat, position));
 
         return convertView;
     }
-
 
     private void showUpdateDialog(Flat flat, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
@@ -159,7 +167,6 @@ public class FlatAdapter extends ArrayAdapter<Flat> {
                 // Update the database
                 DatabaseHelper dbHelper = new DatabaseHelper(context);
                 dbHelper.updateFlatPreviousReading(flat.getId(), newPreviousReading);
-
                 // Notify adapter to refresh the ListView
                 notifyDataSetChanged();
                 dialog.dismiss();
