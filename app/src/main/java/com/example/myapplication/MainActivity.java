@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                 int previousReading = Integer.parseInt(flat.getPreviousReading());
                 int currentReading = Integer.parseInt(flat.getCurrentReading());
 
-                if (currentReading <= previousReading) {
+                if (currentReading < previousReading) {
                     allValid = false; // Set flag to false if any reading is invalid
                     break; // Exit loop early since validation failed
                 }
@@ -423,7 +423,7 @@ public class MainActivity extends AppCompatActivity {
                 int previousReading = Integer.parseInt(flat.getPreviousReading());
                 int currentReading = Integer.parseInt(flat.getCurrentReading());
 
-                if (currentReading <= previousReading) {
+                if (currentReading < previousReading) {
                     allValid = false; // Set flag to false if any reading is invalid
                     break; // Exit loop early since validation failed
                 }
@@ -557,30 +557,39 @@ public class MainActivity extends AppCompatActivity {
     private Table createTable() {
         List<Flat> flats = flatAdapter.getFlats();
         int multiplier = PreferenceUtils.getMultiplier(this);
-        int fixMaintenance = PreferenceUtils.getFixedMaintenance(this);
+        int fixMaintenance = PreferenceUtils.getFixedMaintenance(this); // Constant fix maintenance
         int index_month = PreferenceUtils.getIndex_month(this);
         String updatemonth = months[index_month];
 
         // Create a table with a single cell for the heading
         Table headingTable = new Table(1);
-        headingTable.addCell(new Cell().add(new Paragraph(getListName() + " " + updatemonth + " Maintenance").setFontSize(25).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
+        headingTable.addCell(new Cell().add(new Paragraph(getListName() + " " + updatemonth + " Maintenance").setFontSize(23).setBold()).setTextAlignment(TextAlignment.CENTER).setBorder(Border.NO_BORDER));
 
         // Add the date below the heading
         String currentDate = new SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(new Date());
-        headingTable.addCell(new Cell().add(new Paragraph("Date: " +currentDate).setFontSize(17).setBold()).setTextAlignment(TextAlignment.LEFT).setBorder(Border.NO_BORDER));
+        headingTable.addCell(new Cell().add(new Paragraph("Date: " + currentDate).setFontSize(16).setBold()).setTextAlignment(TextAlignment.LEFT).setBorder(Border.NO_BORDER));
 
         // Create the main table with 8 columns
         Table table = new Table(8);
 
         // Add headers to the table
-        table.addHeaderCell("Flat No.");
-        table.addHeaderCell("Prev. Reading");
-        table.addHeaderCell("Curr. Reading");
-        table.addHeaderCell("Total Units");
-        table.addHeaderCell("Rate/KL");
-        table.addHeaderCell("Water Bill");
-        table.addHeaderCell("Fixed Maint.");
-        table.addHeaderCell("Total Maint.");
+        table.addHeaderCell(new Paragraph("Flat No.").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Prev. Reading").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Curr. Reading").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Total Units").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Rate/KL").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Water Bill").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Fixed Maint.").setBold().setFontSize(13));
+        table.addHeaderCell(new Paragraph("Total Maint.").setBold().setFontSize(13));
+
+        // Variables to hold total values for the last row
+        int totalPrevReading = 0;
+        int totalCurrReading = 0;
+        int totalUnits = 0;
+        int totalWaterBill = 0;
+        int totalMaintenance = 0;
+
+        int totalFixMaintenance = fixMaintenance * flats.size(); // Total fixed maintenance across all flats
 
         // Add data rows to the table
         for (Flat flat : flats) {
@@ -588,25 +597,49 @@ public class MainActivity extends AppCompatActivity {
             int prev = Integer.parseInt(flat.getPreviousReading());
             int totalUnit = curr - prev;
             int waterBill = totalUnit * multiplier;
-            int totalMaintenance = waterBill + fixMaintenance;
+            int totalMaint = waterBill + fixMaintenance;
 
-            table.addCell(flat.getFlatNumber());
-            table.addCell(String.valueOf(prev));
-            table.addCell(String.valueOf(curr));
-            table.addCell(String.valueOf(totalUnit));
-            table.addCell(String.valueOf(multiplier));
-            table.addCell(String.valueOf(waterBill));
-            table.addCell(String.valueOf(fixMaintenance));
-            table.addCell(String.valueOf(totalMaintenance));
+            // Update totals
+            totalPrevReading += prev;
+            totalCurrReading += curr;
+            totalUnits += totalUnit;
+            totalWaterBill += waterBill;
+            totalMaintenance += totalMaint;
+
+            // Add rows for each flat
+            table.addCell(new Paragraph(flat.getFlatNumber()).setBold().setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(prev)).setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(curr)).setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(totalUnit)).setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(multiplier)).setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(waterBill)).setFontSize(12));
+            table.addCell(new Paragraph(String.valueOf(fixMaintenance)).setFontSize(12)); // Constant fix maintenance
+            table.addCell(new Paragraph(String.valueOf(totalMaint)).setBold().setFontSize(12));
         }
+
+        // Add the Total row at the end
+        table.addCell(new Cell().add(new Paragraph("Total").setBold()).setFontSize(13)); // Only label is bold
+        table.addCell(new Paragraph(String.valueOf(totalPrevReading)).setBold().setFontSize(13)); // No bold for these values
+        table.addCell(new Paragraph(String.valueOf(totalCurrReading)).setBold().setFontSize(13));
+        table.addCell(new Paragraph(String.valueOf(totalUnits)).setBold().setFontSize(13));
+        table.addCell(new Paragraph());
+        table.addCell(new Paragraph(String.valueOf(totalWaterBill)).setBold().setFontSize(13));
+        table.addCell(new Paragraph(String.valueOf(totalFixMaintenance)).setBold().setFontSize(13)); // Total of constant fix maintenance
+        table.addCell(new Paragraph(String.valueOf(totalMaintenance)).setBold().setFontSize(13));
 
         // Combine the heading table and main table
         Table finalTable = new Table(1);
         finalTable.addCell(new Cell().add(headingTable).setBorder(Border.NO_BORDER));
         finalTable.addCell(new Cell().add(table).setBorder(Border.NO_BORDER));
 
+        // Add rules below the table
+        finalTable.addCell(new Cell().add(new Paragraph("Rules:")).setFontSize(11).setBold().setBorder(Border.NO_BORDER));
+        finalTable.addCell(new Cell().add(new Paragraph("1. Maintenance must be paid between the 6th and 15th of every month. A penalty of Rs. 200 will be charged for payments made after the 15th.").setFontSize(11)).setBorder(Border.NO_BORDER).setBold());
+        finalTable.addCell(new Cell().add(new Paragraph("2. Always dispose of garbage in the designated bins within the society.").setFontSize(11)).setBorder(Border.NO_BORDER).setBold());
+
         return finalTable;
     }
+
 
 
     private boolean checkPermission() {
