@@ -24,6 +24,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.InputType;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -222,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
                             // Handle the update action
                             if (saveAllReadingsForAllFlats()) {
                                 dbHelper.performUpdate();
-                                int newindex_month = ((PreferenceUtils.getIndex_month(MainActivity.this)) +1) % 13;
+                                int newindex_month = ((PreferenceUtils.getIndex_month(MainActivity.this)) +1) % 12;
                                 PreferenceUtils.updateIndexmonth(MainActivity.this, newindex_month);
                                 updateListView(currentListType, getSelectedButton());
 

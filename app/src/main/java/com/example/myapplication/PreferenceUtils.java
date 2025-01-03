@@ -38,6 +38,9 @@ public class PreferenceUtils {
     }
 
     public static void updateIndexmonth(Context context, int index_month) {
+        if (index_month < 0 || index_month >= 12) {
+            index_month = 0; // Correct it to a valid value
+        }
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(Index_month, index_month);
@@ -46,7 +49,14 @@ public class PreferenceUtils {
 
     public static int getIndex_month(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        return prefs.getInt(Index_month, Index_month_default);
+        int index = prefs.getInt(Index_month, Index_month_default);
+
+        if (index < 0 || index >= 12) {
+            index = 0; // Reset to a default valid value (e.g., January)
+            updateIndexmonth(context, index); // Save the corrected value
+        }
+
+        return index;
     }
 
 }
